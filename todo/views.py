@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 from .models import todo
-# Create your views here.
+from .form import TodoForm
 
 def home(request):
     if request.method == 'POST':
@@ -16,7 +15,6 @@ def home(request):
     return render(request, 'todoapp/todo.html', context)
 
 def DeleteTask(request, id):
-    # Use get_object_or_404 to fetch the todo object by id
     get_todo = get_object_or_404(todo, id=id)
     get_todo.delete()
     return redirect('home-page')
@@ -26,3 +24,18 @@ def Update(request, id):
     get_todo.status = True
     get_todo.save()
     return redirect('home-page')
+
+def EditTask(request, id):
+
+    get_todo = get_object_or_404(todo, id=id)
+    form = TodoForm(instance=get_todo)
+    if request.method == 'POST':
+        form = TodoForm(request.POST, instance=get_todo)
+        if form.is_valid():
+            form.save()
+            return redirect('home-page')
+   
+    context={
+        'the_form': form
+    }
+    return render(request=request, template_name="todoapp/edit_task.html", context=context)
